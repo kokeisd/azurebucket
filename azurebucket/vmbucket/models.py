@@ -1,3 +1,23 @@
 from django.db import models
 
 # Create your models here.
+
+class VMBucket(models.Model):
+
+
+    subscription = models.CharField(max_length=128,blank=True,null=True)
+    resource_group = models.CharField(max_length=128,blank=True,null=True )
+    name = models.CharField(max_length=128,blank=False)
+    primary_ip = models.CharField(max_length=128,blank=True,null=True)
+    location = models.CharField(max_length=128,blank=True,null=True)
+    vm_size = models.CharField(max_length=128,blank=True,null=True)
+    os_disk = models.CharField(max_length=128,blank=True,null=True)
+    os_disk_size = models.IntegerField(blank=True,null=True)
+    status = models.CharField(max_length=128,blank=True,null=True)
+    disks = models.CharField(max_length=1024,blank=True,null=True)
+    avset = models.CharField(max_length=128,blank=True,null=True)
+    tags = models.CharField(max_length=1024,blank=True,null=True)
+    created_time = models.DateTimeField(auto_now_add=True,editable=False)
+
+
+
