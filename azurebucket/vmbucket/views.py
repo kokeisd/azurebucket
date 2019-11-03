@@ -14,3 +14,10 @@ class CreateView(generics.ListCreateAPIView):
     #logger.debug('CreateView***********')
     def perform_create(self, serializer):
         serializer.save()
+
+class DetailsView(generics.RetrieveUpdateDestroyAPIView):
+    """This class handles the http GET, PUT and DELETE requests."""
+  #  logger = logging.getLogger(__name__)
+  #  logger.debug('CreateView***********')
+    queryset = VMBucket.objects.all()
+    serializer_class = VMBucketSerializer        

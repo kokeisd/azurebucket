@@ -25,6 +25,7 @@ from azure.mgmt.compute.models import DiskCreateOption
 from azure.mgmt.resource import SubscriptionClient
 
 from msrestazure.azure_exceptions import CloudError
+import requests 
 
 
 AZURE_TENANT_ID = '5d3e2773-e07f-4432-a630-1a0f68a28a05'
@@ -230,6 +231,12 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
                 }
             vm_list[vm.name] = (vm_info)
 
+            # sending post request and saving response as response object 
+            r = requests.post(url = 'http://localhost:8000/vmbucket/create', data = vm_info) 
+  
+            # extracting response text  
+            pastebin_url = r.text 
+            print("The pastebin URL is:%s" % pastebin_url) 
             
             if debug_mode == True:
                 print(json.dumps(vm_info,indent=4))        
