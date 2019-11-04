@@ -21,3 +21,11 @@ class DetailsView(generics.RetrieveUpdateDestroyAPIView):
   #  logger.debug('CreateView***********')
     queryset = VMBucket.objects.all()
     serializer_class = VMBucketSerializer        
+
+
+class ListVMView(generics.ListAPIView):
+  serializer_class = VMBucketSerializer
+
+  def get_queryset(self):
+     #hostname = self.request.hostname     
+     return VMBucket.objects.filter()
