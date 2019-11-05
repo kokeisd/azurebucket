@@ -13,9 +13,9 @@ import os
 import json
 import traceback
 import configparser
-from tkinter import *
-import pandas as pd
-from pandastable import Table, TableModel
+#from tkinter import *
+#import pandas as pd
+#from pandastable import Table, TableModel
 
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.resource import ResourceManagementClient
@@ -159,6 +159,7 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
     print('\nList VMs in subscription')
 
     subscriptions = get_subscriptions(credentials)
+    headers = {'Content-type': 'application/json'}
     
     if resource_group == None:
         for rg in get_resource_groups(credentials,subscription_id):
@@ -191,12 +192,19 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
                     'os_disk_size':storage.os_disk.disk_size_gb,
                     'os':os,
                     'status':status,
-                    'disks':disks,
+                 #   'disks':disks,
                     'AVSet':avset,
-                    'tags':vm.tags
+                  #  'tags':vm.tags
                     }
                 vm_list[vm.name] = (vm_info)
-                
+
+                #[sub.replace('"', "'") for sub in vm_info] 
+                [sub.replace("'", "XXXX") for sub in vm_info.values()] 
+                #r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create', data = vm_info, headers=headers)            
+                r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create/', data = json.dumps(vm_info), headers=headers,verify=False) 
+                # extracting response text  
+                #pastebin_url = r.text 
+                #print("The pastebin URL is:%s" % pastebin_url)                 
 
                 
                 if debug_mode == True:
@@ -225,18 +233,24 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
                 'os_disk_size':storage.os_disk.disk_size_gb,
                 'os':os,
                 'status':status,
-                'disks':disks,
+                #'disks':disks,
                 'AVSet':avset,
-                'tags':vm.tags
+              #  'tags':vm.tags
                 }
             vm_list[vm.name] = (vm_info)
+            # payload = {'request':  json.dumps(params) }
+            #[sub.replace('"', "'") for sub in vm_info] 
+            #[sub.replace("'", "XXXX") for sub in vm_info.values()] 
+            #print(vm_info)
 
             # sending post request and saving response as response object 
-            r = requests.post(url = 'http://localhost:8000/vmbucket/create', data = vm_info) 
+#            r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create/', data = vm_info, headers=headers,verify=False) 
+            r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create/', data = json.dumps(vm_info), headers=headers,verify=False) 
+            #r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create/', json = vm_info, headers=headers,verify=False) 
   
             # extracting response text  
-            pastebin_url = r.text 
-            print("The pastebin URL is:%s" % pastebin_url) 
+            #pastebin_url = r.text 
+            #print("The pastebin URL is:%s" % pastebin_url) 
             
             if debug_mode == True:
                 print(json.dumps(vm_info,indent=4))        
@@ -256,27 +270,27 @@ def GUIprint(vm_list):
 
 
 
-class PrintTable(Frame):
-    """Basic test frame for the table"""
-    def __init__(self, datadict, parent=None):
-        self.parent = parent
-        Frame.__init__(self)
-        self.main = self.master
-        self.main.geometry('600x400+200+100')
-        self.main.title('Table app')
-        f = Frame(self.main)
-        f.pack(fill=BOTH,expand=1)
-        #df = TableModel.getSampleData()
-        df = pd.DataFrame.from_dict(datadict)
-        df = df.transpose()
-        self.table = pt = Table(f, dataframe=df,
-                                showtoolbar=True, showstatusbar=True)
-        pt.show()
-        return
+# class PrintTable(Frame):
+#     """Basic test frame for the table"""
+#     def __init__(self, datadict, parent=None):
+#         self.parent = parent
+#         Frame.__init__(self)
+#         self.main = self.master
+#         self.main.geometry('600x400+200+100')
+#         self.main.title('Table app')
+#         f = Frame(self.main)
+#         f.pack(fill=BOTH,expand=1)
+#         #df = TableModel.getSampleData()
+#         df = pd.DataFrame.from_dict(datadict)
+#         df = df.transpose()
+#         self.table = pt = Table(f, dataframe=df,
+#                                 showtoolbar=True, showstatusbar=True)
+#         pt.show()
+#         return
     
 
 
 if __name__ == "__main__":
     cred,subid = get_azure_cred(CRED_FILE)
-    GUIprint(get_vm_list(cred,subid,'EAS-HCS-DEV-01'))
-    
+    # GUIprint(get_vm_list(cred,subid,'EAS-HCS-DEV-01'))
+    get_vm_list(cred,subid,'EAS-HCS-DEV-01')
