@@ -13,9 +13,6 @@ import os
 import json
 import traceback
 import configparser
-#from tkinter import *
-#import pandas as pd
-#from pandastable import Table, TableModel
 
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.resource import ResourceManagementClient
@@ -33,29 +30,10 @@ AZURE_CLIENT_ID = '03828b49-95e3-4856-975f-8e12a6a50a73'
 AZURE_CLIENT_SECRET = 'djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY='
 AZURE_SUBSCRIPTION_ID = '96bdec4d-beee-4317-8e6d-06fc6b76cb79'
 
-#haikunator = Haikunator()
+API_ENDPOINT = "http://10.235.17.55:8000/vmbucket/"
 
 debug_mode = True
 quick_mode = True
-
-
-
-
-#VM_REFERENCE = {
-#    'linux': {
-#        'publisher': 'Canonical',
-#        'offer': 'UbuntuServer',
-#        'sku': '16.04.0-LTS',
-#        'version': 'latest'
-#    },
-#    'windows': {
-#        'publisher': 'MicrosoftWindowsServer',
-#        'offer': 'WindowsServer',
-#        'sku': '2016-Datacenter',
-#        'version': 'latest'
-#    }
-#}
-#
 
 CRED_FILE = 'cred.cfg'
 
@@ -144,7 +122,7 @@ def get_subscriptions(credentials):
     return subs_dict
 
 ############################
-def get_vm_list(credentials,subscription_id,resource_group =None):
+def load_vm(credentials,subscription_id,resource_group =None):
     """Get the list of VMs in a subscription
 
     :param credentials: 
@@ -156,7 +134,7 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
     network_client = NetworkManagementClient(credentials, subscription_id)
 
     vm_list ={}
-    print('\nList VMs in subscription')
+    # print('\nList VMs in subscription')
 
     subscriptions = get_subscriptions(credentials)
     headers = {'Content-type': 'application/json'}
@@ -169,20 +147,24 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
             #for vm in compute_client.virtual_machines.list_all():
             #for vm in compute_client.virtual_machines.list('SEA-GIS-CLOUD-IMAGES'):
                 #name = vm['name']
-                
+                print('###Loading..'+ vm.name)
                 hw = vm.hardware_profile  
                 storage = vm.storage_profile 
-                avset = vm.availability_set.id.split('/')[-1:][0]
+                #avset = vm.availability_set.id.split('/')[-1:][0]
                 #os = vm.os_profile
                 instance_view =get_vm(compute_client,rg,vm.name).instance_view
                 #os = instance_view.os_name
                 os = instance_view.os_name if instance_view.os_name is not None else str('NA')
-                status = instance_view.statuses[1].display_status
+                #status = instance_view.statuses[1].display_status
                 disks =[disk.name for disk in instance_view.disks]
+                disks = ','.join(disks)
+                #disks = disks + disk.name for disk in instance_view.disks
+
                 primary_ip = get_vm_primary_ip(network_client,vm)
+                tags = json.dumps(vm.tags)
 
                 vm_info = {
-                    'subscriptions': subscriptions[subscription_id],
+                    'subscription': subscriptions[subscription_id],
                     'resource_group':rg,
                     'name':vm.name,
                     'primary_ip':primary_ip,
@@ -192,26 +174,30 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
                     'os_disk_size':storage.os_disk.disk_size_gb,
                     'os':os,
                     'status':status,
-                 #   'disks':disks,
-                    'AVSet':avset,
-                    'tags':vm.tags
+                    'disks':disks,
+                   # 'AVSet':avset,
+                    'tags':tags
                     }
                 vm_list[vm.name] = (vm_info)
-
-                #[sub.replace('"', "'") for sub in vm_info] 
-                [sub.replace("'", "XXXX") for sub in vm_info.values()] 
-                #r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create', data = vm_info, headers=headers)            
-                r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create/', data = json.dumps(vm_info), headers=headers,verify=False) 
-                # extracting response text  
-                #pastebin_url = r.text 
-                #print("The pastebin URL is:%s" % pastebin_url)                 
+                API_URL = API_ENDPOINT + vm.name + "/"
+                r = requests.get(url = API_URL) 
+                if r.headers['Content-Length'] == "2":
+                    print("The record does not exist...creating " + vm.name)
+                    CREATE_URL = API_ENDPOINT + "create/"
+                    print(CREATE_URL+" : "+ json.dumps(vm_info))
+                    r = requests.post(url = CREATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
+                else:
+                    print('The record exists...updating ' + vm.name)
+                    UPDATE_URL = API_ENDPOINT + vm.name + "/update/"
+                    print(UPDATE_URL+" : " +json.dumps(vm_info))
+                    r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False)               
 
                 
                 if debug_mode == True:
                     print(json.dumps(vm_info,indent=4)) 
     else:        
         for vm in compute_client.virtual_machines.list(resource_group,expand='instanceView'):
-            
+            print('###Loading..'+ vm.name)
             hw = vm.hardware_profile  
             storage = vm.storage_profile 
             avset = vm.availability_set.id.split('/')[-1:][0]
@@ -219,11 +205,16 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
             instance_view =get_vm(compute_client,resource_group,vm.name).instance_view
             #os = instance_view.os_name
             os = instance_view.os_name if instance_view.os_name is not None else str('NA')
-            status = instance_view.statuses[1].display_status
+            #status = instance_view.statuses[1].display_status
             disks =[disk.name for disk in instance_view.disks]
+            disks = ','.join(disks)
+            #disks = "".join(disk.name) for disk in instance_view.disks
+
             primary_ip = get_vm_primary_ip(network_client,vm)
+            #tags = vm.tags.replace('{','')
+            tags = json.dumps(vm.tags)
             vm_info = {
-                'subscriptions': subscriptions[subscription_id],
+                'subscription': subscriptions[subscription_id],
                 'resource_group':resource_group,
                 'name':vm.name,
                 'primary_ip':primary_ip,
@@ -233,64 +224,41 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
                 'os_disk_size':storage.os_disk.disk_size_gb,
                 'os':os,
                 'status':status,
-                #'disks':disks,
+                'disks':disks,
                 'AVSet':avset,
-              #  'tags':vm.tags
+                #'tags':vm.tags
+                'tags':tags
                 }
             vm_list[vm.name] = (vm_info)
-            # payload = {'request':  json.dumps(params) }
-            #[sub.replace('"', "'") for sub in vm_info] 
-            #[sub.replace("'", "XXXX") for sub in vm_info.values()] 
-            #print(vm_info)
+            API_URL = API_ENDPOINT + vm.name + "/"
+            r = requests.get(url = API_URL) 
+            if r.headers['Content-Length'] == "2":
+                print("The record does not exist...creating " + vm.name)
+                CREATE_URL = API_ENDPOINT + "create/"
+                print(CREATE_URL+" : "+ json.dumps(vm_info))
+                r = requests.post(url = CREATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
+            else:
+                print('The record exists...updating ' + vm.name)
+                UPDATE_URL = API_ENDPOINT + vm.name + "/update/"
+                print(UPDATE_URL+" : " +json.dumps(vm_info))
+                r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
 
-            # sending post request and saving response as response object 
-#            r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create/', data = vm_info, headers=headers,verify=False) 
-            r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create/', data = json.dumps(vm_info), headers=headers,verify=False) 
-            #r = requests.post(url = 'http://10.235.17.55:8000/vmbucket/create/', json = vm_info, headers=headers,verify=False) 
-  
-            # extracting response text  
-            #pastebin_url = r.text 
-            #print("The pastebin URL is:%s" % pastebin_url) 
             
             if debug_mode == True:
                 print(json.dumps(vm_info,indent=4))        
-
-
-
 
     
     return vm_list
 
         
 
-def GUIprint(vm_list):
-    app = PrintTable(vm_list)
-    #launch the app
-    app.mainloop()
 
 
 
-# class PrintTable(Frame):
-#     """Basic test frame for the table"""
-#     def __init__(self, datadict, parent=None):
-#         self.parent = parent
-#         Frame.__init__(self)
-#         self.main = self.master
-#         self.main.geometry('600x400+200+100')
-#         self.main.title('Table app')
-#         f = Frame(self.main)
-#         f.pack(fill=BOTH,expand=1)
-#         #df = TableModel.getSampleData()
-#         df = pd.DataFrame.from_dict(datadict)
-#         df = df.transpose()
-#         self.table = pt = Table(f, dataframe=df,
-#                                 showtoolbar=True, showstatusbar=True)
-#         pt.show()
-#         return
-    
 
 
 if __name__ == "__main__":
     cred,subid = get_azure_cred(CRED_FILE)
     # GUIprint(get_vm_list(cred,subid,'EAS-HCS-DEV-01'))
-    get_vm_list(cred,subid,'EAS-HCS-DEV-01')
+    #get_vm_list(cred,subid,'EAS-HCS-DEV-01')
+    load_vm(cred,subid)

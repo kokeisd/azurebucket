@@ -17,7 +17,7 @@ class VMBucket(models.Model):
     disks = models.CharField(max_length=1024,blank=True,null=True)
     avset = models.CharField(max_length=128,blank=True,null=True)
     tags = models.CharField(max_length=1024,blank=True,null=True)
-    created_time = models.DateTimeField(auto_now_add=True,editable=False)
+    last_update_time = models.DateTimeField(auto_now=True,editable=False)
 
 
 

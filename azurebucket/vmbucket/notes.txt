@@ -4,4 +4,5 @@ curl -H "Content-Type: application/json"  -XPOST http://10.235.17.55:8000/vmbuck
 
 
 # Update a record
-curl -H "Content-Type: application/json"  -XPUT http://10.235.17.55:8000/vmbucket/update/VM2/ -d '{"name": "'"VM3"'","subscriptions": "'"MFC-Asia-DevQA_Internal-S1"'"}'	
+#curl -H "Content-Type: application/json"  -XPUT http://10.235.17.55:8000/vmbucket/VM3/update/ -d '{"name": "'"VM3"'","subscription": "'"Sub-1"'"}'	
+curl -H "Content-Type: application/json"  -XPUT http://10.235.17.55:8000/vmbucket/VM3/update/ -d '{"name": "'"VM3"'","subscription": "'"Sub-1"'"}'	
