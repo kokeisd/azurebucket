@@ -194,7 +194,7 @@ def get_vm_list(credentials,subscription_id,resource_group =None):
                     'status':status,
                  #   'disks':disks,
                     'AVSet':avset,
-                  #  'tags':vm.tags
+                    'tags':vm.tags
                     }
                 vm_list[vm.name] = (vm_info)
 
