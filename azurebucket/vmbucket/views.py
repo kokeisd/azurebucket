@@ -15,11 +15,17 @@ class CreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save()
 
+class ListVMView(generics.ListAPIView):
+  serializer_class = VMBucketSerializer
+
+  def get_queryset(self):
+     #hostname = self.request.hostname
+     hostname = self.kwargs['name']
+#data = {"results": list(details.values('id', 'name','host','cmd','output', 'date_created', 'date_modified'))}
+     return VMBucket.objects.filter(name=hostname)
   
 
-
-
-class ListVMView(generics.ListAPIView):
+class ListAllVMView(generics.ListAPIView):
   serializer_class = VMBucketSerializer
 
   def get_queryset(self):
