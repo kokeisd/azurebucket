@@ -121,6 +121,23 @@ def get_subscriptions(credentials):
         #print(subscription.subscription_id)
     return subs_dict
 
+##################################################    
+def send_rest_req(vm_info,API_URL):
+    headers = {'Content-type': 'application/json'}
+    API_URL = API_ENDPOINT + vm_info['name'] + "/"
+    r = requests.get(url = API_URL) 
+    if r.headers['Content-Length'] == "2":
+        print("The record does not exist...creating " + vm_info['name'])
+        CREATE_URL = API_ENDPOINT + "create/"
+        print(CREATE_URL+" : "+ json.dumps(vm_info))
+        r = requests.post(url = CREATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
+    else:
+        print('The record exists...updating ' + vm_info['name'])
+        UPDATE_URL = API_ENDPOINT + vm_info['name'] + "/update/"
+        print(UPDATE_URL+" : " +json.dumps(vm_info))
+        r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False)               
+
+
 ############################
 def load_vm(credentials,subscription_id,resource_group =None):
     """Get the list of VMs in a subscription
@@ -137,7 +154,7 @@ def load_vm(credentials,subscription_id,resource_group =None):
     # print('\nList VMs in subscription')
 
     subscriptions = get_subscriptions(credentials)
-    headers = {'Content-type': 'application/json'}
+    #headers = {'Content-type': 'application/json'}
     
     if resource_group == None:
         for rg in get_resource_groups(credentials,subscription_id):
@@ -148,24 +165,65 @@ def load_vm(credentials,subscription_id,resource_group =None):
             #for vm in compute_client.virtual_machines.list('SEA-GIS-CLOUD-IMAGES'):
                 #name = vm['name']
                 print('###Loading..'+ vm.name)
+                try:
+                    hw = vm.hardware_profile  
+                    storage = vm.storage_profile 
+                    #avset = vm.availability_set.id.split('/')[-1:][0]
+                    #os = vm.os_profile
+                    instance_view =get_vm(compute_client,rg,vm.name).instance_view
+                    #os = instance_view.os_name
+                    os = instance_view.os_name if instance_view.os_name is not None else str('NA')
+                    status = instance_view.statuses[1].display_status
+                    disks =[disk.name for disk in instance_view.disks]
+                    disks = ','.join(disks)
+                    #disks = disks + disk.name for disk in instance_view.disks
+
+                    primary_ip = get_vm_primary_ip(network_client,vm)
+                    tags = json.dumps(vm.tags)
+
+                    vm_info = {
+                        'subscription': subscriptions[subscription_id],
+                        'resource_group':rg,
+                        'name':vm.name,
+                        'primary_ip':primary_ip,
+                        'location':vm.location,
+                        'vm_size':hw.vm_size,
+                        'os_disk':storage.os_disk.name,
+                        'os_disk_size':storage.os_disk.disk_size_gb,
+                        'os':os,
+                        'status':status,
+                        'disks':disks,
+                       # 'AVSet':avset,
+                        'tags':tags
+                        }
+                    send_rest_req(vm_info,API_ENDPOINT)    
+                    if debug_mode == True:
+                        print(json.dumps(vm_info,indent=4))            
+                except:
+                    print('#### Error in retrieving info for '+ vm.name+ '####')
+
+    else:        
+        for vm in compute_client.virtual_machines.list(resource_group,expand='instanceView'):
+            print('###Loading..'+ vm.name)
+            try:
                 hw = vm.hardware_profile  
                 storage = vm.storage_profile 
-                #avset = vm.availability_set.id.split('/')[-1:][0]
+                avset = vm.availability_set.id.split('/')[-1:][0]
                 #os = vm.os_profile
-                instance_view =get_vm(compute_client,rg,vm.name).instance_view
+                instance_view =get_vm(compute_client,resource_group,vm.name).instance_view
                 #os = instance_view.os_name
                 os = instance_view.os_name if instance_view.os_name is not None else str('NA')
-                #status = instance_view.statuses[1].display_status
+                status = instance_view.statuses[1].display_status
                 disks =[disk.name for disk in instance_view.disks]
                 disks = ','.join(disks)
-                #disks = disks + disk.name for disk in instance_view.disks
+                #disks = "".join(disk.name) for disk in instance_view.disks
 
                 primary_ip = get_vm_primary_ip(network_client,vm)
-                tags = json.dumps(vm.tags)
 
+                tags = json.dumps(vm.tags)
                 vm_info = {
                     'subscription': subscriptions[subscription_id],
-                    'resource_group':rg,
+                    'resource_group':resource_group,
                     'name':vm.name,
                     'primary_ip':primary_ip,
                     'location':vm.location,
@@ -175,79 +233,18 @@ def load_vm(credentials,subscription_id,resource_group =None):
                     'os':os,
                     'status':status,
                     'disks':disks,
-                   # 'AVSet':avset,
+                    'AVSet':avset,
+                    #'tags':vm.tags
                     'tags':tags
                     }
-                vm_list[vm.name] = (vm_info)
-                API_URL = API_ENDPOINT + vm.name + "/"
-                r = requests.get(url = API_URL) 
-                if r.headers['Content-Length'] == "2":
-                    print("The record does not exist...creating " + vm.name)
-                    CREATE_URL = API_ENDPOINT + "create/"
-                    print(CREATE_URL+" : "+ json.dumps(vm_info))
-                    r = requests.post(url = CREATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
-                else:
-                    print('The record exists...updating ' + vm.name)
-                    UPDATE_URL = API_ENDPOINT + vm.name + "/update/"
-                    print(UPDATE_URL+" : " +json.dumps(vm_info))
-                    r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False)               
-
-                
+                #vm_list[vm.name] = (vm_info)
+                send_rest_req(vm_info,API_ENDPOINT)
                 if debug_mode == True:
-                    print(json.dumps(vm_info,indent=4)) 
-    else:        
-        for vm in compute_client.virtual_machines.list(resource_group,expand='instanceView'):
-            print('###Loading..'+ vm.name)
-            hw = vm.hardware_profile  
-            storage = vm.storage_profile 
-            avset = vm.availability_set.id.split('/')[-1:][0]
-            #os = vm.os_profile
-            instance_view =get_vm(compute_client,resource_group,vm.name).instance_view
-            #os = instance_view.os_name
-            os = instance_view.os_name if instance_view.os_name is not None else str('NA')
-            #status = instance_view.statuses[1].display_status
-            disks =[disk.name for disk in instance_view.disks]
-            disks = ','.join(disks)
-            #disks = "".join(disk.name) for disk in instance_view.disks
+                    print(json.dumps(vm_info,indent=4))  
+            except:
+                print('#### Error in retrieving info for '+ vm.name+ '####')
 
-            primary_ip = get_vm_primary_ip(network_client,vm)
-            #tags = vm.tags.replace('{','')
-            tags = json.dumps(vm.tags)
-            vm_info = {
-                'subscription': subscriptions[subscription_id],
-                'resource_group':resource_group,
-                'name':vm.name,
-                'primary_ip':primary_ip,
-                'location':vm.location,
-                'vm_size':hw.vm_size,
-                'os_disk':storage.os_disk.name,
-                'os_disk_size':storage.os_disk.disk_size_gb,
-                'os':os,
-                'status':status,
-                'disks':disks,
-                'AVSet':avset,
-                #'tags':vm.tags
-                'tags':tags
-                }
-            vm_list[vm.name] = (vm_info)
-            API_URL = API_ENDPOINT + vm.name + "/"
-            r = requests.get(url = API_URL) 
-            if r.headers['Content-Length'] == "2":
-                print("The record does not exist...creating " + vm.name)
-                CREATE_URL = API_ENDPOINT + "create/"
-                print(CREATE_URL+" : "+ json.dumps(vm_info))
-                r = requests.post(url = CREATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
-            else:
-                print('The record exists...updating ' + vm.name)
-                UPDATE_URL = API_ENDPOINT + vm.name + "/update/"
-                print(UPDATE_URL+" : " +json.dumps(vm_info))
-                r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
 
-            
-            if debug_mode == True:
-                print(json.dumps(vm_info,indent=4))        
-
-    
     return vm_list
 
         
@@ -261,4 +258,6 @@ if __name__ == "__main__":
     cred,subid = get_azure_cred(CRED_FILE)
     # GUIprint(get_vm_list(cred,subid,'EAS-HCS-DEV-01'))
     #get_vm_list(cred,subid,'EAS-HCS-DEV-01')
-    load_vm(cred,subid)
+    subscriptions_list = get_subscriptions(cred)
+    for sub in subscriptions_list.keys():
+        load_vm(cred,sub)
