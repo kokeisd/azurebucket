@@ -6,3 +6,6 @@ curl -H "Content-Type: application/json"  -XPOST http://10.235.17.55:8000/vmbuck
 # Update a record
 #curl -H "Content-Type: application/json"  -XPUT http://10.235.17.55:8000/vmbucket/VM3/update/ -d '{"name": "'"VM3"'","subscription": "'"Sub-1"'"}'	
 curl -H "Content-Type: application/json"  -XPUT http://10.235.17.55:8000/vmbucket/VM3/update/ -d '{"name": "'"VM3"'","subscription": "'"Sub-1"'"}'	
+
+
+nohup python manage.py runserver 0.0.0.0:8000  2>&1 >> logs/serverlog.`date +%y%m%d%H%M%S` &

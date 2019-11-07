@@ -121,26 +121,6 @@ def get_subscriptions(credentials):
         #print(subscription.subscription_id)
     return subs_dict
 
-########################################################
-def get_vm_all_ip(vm, network_client):
-
-    all_ips =[]
-    for interface in vm.network_profile.network_interfaces:
-        name=" ".join(interface.id.split('/')[-1:])
-        sub="".join(interface.id.split('/')[4])
-
-        try:
-            thing=network_client.network_interfaces.get(sub, name).ip_configurations
-
-            for x in thing:
-                print(x.private_ip_address)
-                all_ips.append(x.private_ip_address)
-
-        except:
-            print("nope")    
-
-    return all_ips
-
 ##################################################    
 def send_rest_req(vm_info,API_URL):
     headers = {'Content-type': 'application/json'}
@@ -188,10 +168,8 @@ def load_vm(credentials,subscription_id,resource_group =None):
                 try:
                     hw = vm.hardware_profile  
                     storage = vm.storage_profile 
-                    avset = vm.availability_set.id.split('/')[-1:][0] if vm.availability_set is not None  else str('NA')
-                    #avset = vm.availability_set.id.split('/')[-1:][0]
+                    avset = vm.availability_set.id.split('/')[-1:][0]
                     #os = vm.os_profile
-                    
                     instance_view =get_vm(compute_client,rg,vm.name).instance_view
                     #os = instance_view.os_name
                     os = instance_view.os_name if instance_view.os_name is not None else str('NA')
@@ -199,15 +177,13 @@ def load_vm(credentials,subscription_id,resource_group =None):
                     disks =[disk.name for disk in instance_view.disks]
                     disks = ','.join(disks)
                     primary_ip = get_vm_primary_ip(network_client,vm)
-                    secondary_ips = [ip for ip in get_vm_all_ip(vm,network_client) if ip == primary_ip]
                     tags = json.dumps(vm.tags)
 
                     vm_info = {
                         'subscription': subscriptions[subscription_id],
                         'resource_group':rg,
                         'name':vm.name,
-                        'primary_ip_address':primary_ip,
-                        'secondary_ip_addresses': ','.join(secondary_ips),
+                        'primary_ip':primary_ip,
                         'location':vm.location,
                         'vm_size':hw.vm_size,
                         'os_disk':storage.os_disk.name,
@@ -221,8 +197,8 @@ def load_vm(credentials,subscription_id,resource_group =None):
                     send_rest_req(vm_info,API_ENDPOINT)    
                     if debug_mode == True:
                         print(json.dumps(vm_info,indent=4))            
-                except Exception as e:
-                    print('#### Error in retrieving info for '+ vm.name+ '#### ==> ' + str(e))
+                except:
+                    print('#### Error in retrieving info for '+ vm.name+ '####')
 
     else:        
         try:
@@ -230,10 +206,10 @@ def load_vm(credentials,subscription_id,resource_group =None):
                 print('###Loading..'+ vm.name)
                 try:
                     hw = vm.hardware_profile  
-                    storage = vm.storage_profile                     
-                    avset = vm.availability_set.id.split('/')[-1:][0] if vm.availability_set is not None  else str('NA')
+                    storage = vm.storage_profile 
+                    print("###############" + vm.availability_set)
+                    avset = vm.availability_set.id.split('/')[-1:][0]
                     #os = vm.os_profile
-                    
                     instance_view =get_vm(compute_client,resource_group,vm.name).instance_view
                     #os = instance_view.os_name
                     os = instance_view.os_name if instance_view.os_name is not None else str('NA')
@@ -241,14 +217,12 @@ def load_vm(credentials,subscription_id,resource_group =None):
                     disks =[disk.name for disk in instance_view.disks]
                     disks = ','.join(disks)
                     primary_ip = get_vm_primary_ip(network_client,vm)
-                    secondary_ips = [ip for ip in get_vm_all_ip(vm,network_client) if ip == primary_ip]
                     tags = json.dumps(vm.tags)
                     vm_info = {
                         'subscription': subscriptions[subscription_id],
                         'resource_group':resource_group,
                         'name':vm.name,
-                        'primary_ip_address':primary_ip,
-                        'secondary_ip_addresses': ','.join(secondary_ips),
+                        'primary_ip':primary_ip,
                         'location':vm.location,
                         'vm_size':hw.vm_size,
                         'os_disk':storage.os_disk.name,
@@ -263,9 +237,9 @@ def load_vm(credentials,subscription_id,resource_group =None):
                     send_rest_req(vm_info,API_ENDPOINT)
                     if debug_mode == True:
                         print(json.dumps(vm_info,indent=4))  
-                except Exception as e:
-                    print('#### Error in retrieving info for '+ vm.name+ '#### ==> ' + str(e))
-        except Exception as e:
+                except:
+                    print('#### Error in retrieving info for '+ vm.name+ '####')
+        except:
             print('Error in finding the resource group: ' + resource_group)
 
 
@@ -280,8 +254,8 @@ def load_vm(credentials,subscription_id,resource_group =None):
 
 if __name__ == "__main__":
     cred,subid = get_azure_cred(CRED_FILE)
-    #load_vm(cred,subid,'EAS-HCS-DEV-01')
+    load_vm(cred,subid,'EAS-HCS-DEV-01')
     #get_vm_list(cred,subid,'EAS-HCS-DEV-01')
     subscriptions_list = get_subscriptions(cred)
-    for sub in subscriptions_list.keys():
-        load_vm(cred,sub)
+    #for sub in subscriptions_list.keys():
+    #    load_vm(cred,sub,'EAS-HCS-DEV-01')

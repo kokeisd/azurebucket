@@ -2,7 +2,7 @@ import sqlite3
 
 def deleteRecord():
     try:
-        sqliteConnection = sqlite3.connect('../db.sqlite3')
+        sqliteConnection = sqlite3.connect('../../db.sqlite3')
         cursor = sqliteConnection.cursor()
         print("Connected to SQLite")
 
@@ -15,7 +15,7 @@ def deleteRecord():
 
 
         #print(cursor.fetchall())
-        sql_delete_query = 'delete from sqlite_sequence where name="api_bucket"';
+        sql_delete_query = 'delete from sqlite_sequence where name="vmbucket_vmbucket"';
         cursor.execute(sql_delete_query)
         sqliteConnection.commit()
         print("Record deleted successfully ")

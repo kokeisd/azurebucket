@@ -2,7 +2,7 @@ import sqlite3
 
 def deleteRecord():
     try:
-        sqliteConnection = sqlite3.connect('../db.sqlite3')
+        sqliteConnection = sqlite3.connect('../../db.sqlite3')
         cursor = sqliteConnection.cursor()
         print("Connected to SQLite")
 
