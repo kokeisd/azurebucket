@@ -4,10 +4,7 @@
 
 This script expects that the following environment vars are set:
 
-AZURE_TENANT_ID: your Azure Active Directory tenant id or domain
-AZURE_CLIENT_ID: your Azure Active Directory Application Client ID
-AZURE_CLIENT_SECRET: your Azure Active Directory Application Secret
-AZURE_SUBSCRIPTION_ID: your Azure Subscription Id
+
 """
 import os
 import json
@@ -23,19 +20,25 @@ from azure.mgmt.resource import SubscriptionClient
 
 from msrestazure.azure_exceptions import CloudError
 import requests 
+from datetime import datetime
+import logging
 
 
-AZURE_TENANT_ID = '5d3e2773-e07f-4432-a630-1a0f68a28a05'
-AZURE_CLIENT_ID = '03828b49-95e3-4856-975f-8e12a6a50a73'
-AZURE_CLIENT_SECRET = 'djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY='
-AZURE_SUBSCRIPTION_ID = '96bdec4d-beee-4317-8e6d-06fc6b76cb79'
 
 API_ENDPOINT = "http://10.235.17.55:8000/vmbucket/"
 
-debug_mode = True
+debug_mode = False
 quick_mode = True
 
+#logging.basicConfig(filename='loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,filename='loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.INFO)
+logging.info('test')
+
+
 CRED_FILE = 'cred.cfg'
+
+
 
 ################################
 def get_azure_cred(cred_file):
@@ -48,7 +51,6 @@ def get_azure_cred(cred_file):
     config.read(cred_file)
 
     subscription_id = str(config['DEFAULT']['azure_subscription_id'])
-    ##print('*****'+subscription_id)
     credentials = ServicePrincipalCredentials(
         client_id=config['DEFAULT']['azure_client_id'],
         secret=config['DEFAULT']['azure_client_secret'],
@@ -92,7 +94,7 @@ def get_nic(network, resource_group, name):
 
 #################
 def get_vm_primary_ip(network,vm):
-    """Get the details of a VM
+    """Get the primary ip address of a VM
 
     :param network: the NetworkManagementClient object
     :param vm: the VirtualMachine object
@@ -123,7 +125,11 @@ def get_subscriptions(credentials):
 
 ########################################################
 def get_vm_all_ip(vm, network_client):
+    """Get the all ip addresses of a VM
 
+    :param network: the NetworkManagementClient object
+    :param vm: the VirtualMachine object
+    """
     all_ips =[]
     for interface in vm.network_profile.network_interfaces:
         name=" ".join(interface.id.split('/')[-1:])
@@ -133,28 +139,35 @@ def get_vm_all_ip(vm, network_client):
             thing=network_client.network_interfaces.get(sub, name).ip_configurations
 
             for x in thing:
-                print(x.private_ip_address)
+                #print(x.private_ip_address)
                 all_ips.append(x.private_ip_address)
 
         except:
-            print("nope")    
+            print("Unable to get the IP address for the machine "+ name)    
 
     return all_ips
 
 ##################################################    
 def send_rest_req(vm_info,API_URL):
+    """Send a HTTP REST request to the API server to update the VM inventory
+
+    :param vm_info: the info of a vm in a dictionary format
+    :param API_URL: the API server endpoint
+    """    
     headers = {'Content-type': 'application/json'}
     API_URL = API_ENDPOINT + vm_info['name'] + "/"
     r = requests.get(url = API_URL) 
     if r.headers['Content-Length'] == "2":
-        print("The record does not exist...creating " + vm_info['name'])
+        print(str(datetime.now())+" The record does not exist...creating " + vm_info['name'])
+        logging.info(str(datetime.now())+" The record does not exist...creating " + vm_info['name'])
         CREATE_URL = API_ENDPOINT + "create/"
-        print(CREATE_URL+" : "+ json.dumps(vm_info))
+        #print(CREATE_URL+" : "+ json.dumps(vm_info))
         r = requests.post(url = CREATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
     else:
-        print('The record exists...updating ' + vm_info['name'])
+        print(str(datetime.now())+' The record exists...updating ' + vm_info['name'])
+        logging.info(str(datetime.now())+' The record exists...updating ' + vm_info['name'])
         UPDATE_URL = API_ENDPOINT + vm_info['name'] + "/update/"
-        print(UPDATE_URL+" : " +json.dumps(vm_info))
+        #print(UPDATE_URL+" : " +json.dumps(vm_info))
         r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False)               
 
 
@@ -184,7 +197,8 @@ def load_vm(credentials,subscription_id,resource_group =None):
             #for vm in compute_client.virtual_machines.list_all():
             #for vm in compute_client.virtual_machines.list('SEA-GIS-CLOUD-IMAGES'):
                 #name = vm['name']
-                print('###Loading..'+ vm.name)
+                #print('###Loading..'+ vm.name)
+                logging.info('### Scanning VM..'+ vm.name)
                 try:
                     hw = vm.hardware_profile  
                     storage = vm.storage_profile 
@@ -220,14 +234,17 @@ def load_vm(credentials,subscription_id,resource_group =None):
                         }
                     send_rest_req(vm_info,API_ENDPOINT)    
                     if debug_mode == True:
-                        print(json.dumps(vm_info,indent=4))            
+                        #print(json.dumps(vm_info,indent=4))   
+                        logging.debug(json.dumps(vm_info,indent=4))         
                 except Exception as e:
-                    print('#### Error in retrieving info for '+ vm.name+ '#### ==> ' + str(e))
+                    #print('#### Error in retrieving info for '+ vm.name+ '#### ==> ' + str(e))
+                    logging.error('#### Error in retrieving info for '+ vm.name+ '#### ==> ' + str(e))
 
     else:        
         try:
             for vm in compute_client.virtual_machines.list(resource_group,expand='instanceView'):
-                print('###Loading..'+ vm.name)
+                #print('###Loading..'+ vm.name)
+                logging.info('### Scanning VM..'+ vm.name)
                 try:
                     hw = vm.hardware_profile  
                     storage = vm.storage_profile                     
@@ -262,21 +279,17 @@ def load_vm(credentials,subscription_id,resource_group =None):
                     #vm_list[vm.name] = (vm_info)
                     send_rest_req(vm_info,API_ENDPOINT)
                     if debug_mode == True:
-                        print(json.dumps(vm_info,indent=4))  
+                        #print(json.dumps(vm_info,indent=4)) 
+                        logging.debug(json.dumps(vm_info,indent=4))          
                 except Exception as e:
-                    print('#### Error in retrieving info for '+ vm.name+ '#### ==> ' + str(e))
+                    #print('#### Error in retrieving info for '+ vm.name+ '#### ==> ' + str(e))
+                    logging.error('#### Error in retrieving info for '+ vm.name+ '#### ==> ' + str(e))
         except Exception as e:
-            print('Error in finding the resource group: ' + resource_group)
-
-
+            #print('Error in finding the resource group: ' + resource_group)
+            logging.error('Error in finding the resource group: ' + resource_group)
     return vm_list
 
         
-
-
-
-
-
 
 if __name__ == "__main__":
     cred,subid = get_azure_cred(CRED_FILE)
