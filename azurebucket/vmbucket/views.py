@@ -2,6 +2,11 @@ from django.shortcuts import render
 from .models import VMBucket
 from .serializers import VMBucketSerializer
 from rest_framework import generics
+from django_filters.views import FilterView
+from django_tables2.export.views import ExportMixin
+from django_tables2 import MultiTableMixin, RequestConfig, SingleTableMixin, SingleTableView
+from .filters import VMBucketFilter
+from .tables import VMBucketTable
 
 # Create your views here.
 
@@ -40,3 +45,16 @@ class UpdateView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = VMBucketSerializer
     lookup_url_kwarg = 'name'
     lookup_field = 'name'
+
+class ListVMWebView(ExportMixin, SingleTableMixin, FilterView):
+    table_class = VMBucketTable
+    model = VMBucket
+    template_name = "listvm.html"
+    filterset_class = VMBucketFilter
+    export_formats = ("csv", "xls")
+
+  #  def get_queryset(self):
+      #return super().get_queryset().select_related("host")
+    
+    def get_table_kwargs(self):
+        return {"template_name": "django_tables2/bootstrap.html"}

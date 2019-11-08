@@ -31,9 +31,8 @@ debug_mode = False
 quick_mode = True
 
 #logging.basicConfig(filename='loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
-logging.basicConfig(level=logging.INFO,filename='loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,filename='logs/loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 #logging.basicConfig(level=logging.INFO)
-logging.info('test')
 
 
 CRED_FILE = 'cred.cfg'
