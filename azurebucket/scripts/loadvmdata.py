@@ -154,7 +154,8 @@ def send_rest_req(vm_info,API_URL):
     :param API_URL: the API server endpoint
     """    
     headers = {'Content-type': 'application/json'}
-    API_URL = API_ENDPOINT + vm_info['name'] + "/"
+    #API_URL = API_ENDPOINT + vm_info['name'] + "/"
+    API_URL = API_ENDPOINT +"read/"+ vm_info['name'] + "/"
     r = requests.get(url = API_URL) 
     if r.headers['Content-Length'] == "2":
         print(str(datetime.now())+" The record does not exist...creating " + vm_info['name'])
@@ -165,7 +166,8 @@ def send_rest_req(vm_info,API_URL):
     else:
         print(str(datetime.now())+' The record exists...updating ' + vm_info['name'])
         logging.info(str(datetime.now())+' The record exists...updating ' + vm_info['name'])
-        UPDATE_URL = API_ENDPOINT + vm_info['name'] + "/update/"
+        #UPDATE_URL = API_ENDPOINT + vm_info['name'] + "/update/"
+        UPDATE_URL = API_ENDPOINT + "update/" + vm_info['name']        
         #print(UPDATE_URL+" : " +json.dumps(vm_info))
         r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False)               
 
