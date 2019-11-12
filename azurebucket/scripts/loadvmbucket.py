@@ -155,7 +155,7 @@ def send_rest_req(vm_info,API_URL):
     """    
     headers = {'Content-type': 'application/json'}
     #API_URL = API_ENDPOINT + vm_info['name'] + "/"
-    API_URL = API_ENDPOINT +"read/"+ vm_info['name'] + "/"
+    API_URL = API_ENDPOINT +"vm/"+ vm_info['name'] + "/"
     r = requests.get(url = API_URL) 
     if r.headers['Content-Length'] == "2":
         print(str(datetime.now())+" The record does not exist...creating " + vm_info['name'])
