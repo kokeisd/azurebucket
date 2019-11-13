@@ -9,3 +9,14 @@ curl -H "Content-Type: application/json"  -XPUT http://10.235.17.55:8000/vmbucke
 
 
 nohup python manage.py runserver 0.0.0.0:8000  2>&1 >> logs/serverlog.`date +%y%mbash
+
+cd project/project
+mkdir settings
+mv settings.py settings/base.py
+curl https://gist.githubusercontent.com/kokeisd/f3822c139dab89cf266730dd9502bc96/raw/ --output dev.py
+curl https://gist.githubusercontent.com/kokeisd/bb33f89457c2ff07cc18f9a3d9bd5721/raw/ --output prod.py
+
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'azurebucket.settings')
+
+    profile = os.environ.get('PROJECT_PROFILE','dev')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'azurebucket.settings.%s' % profile)
