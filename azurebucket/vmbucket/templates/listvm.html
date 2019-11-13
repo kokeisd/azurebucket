@@ -6,7 +6,9 @@
 <html>
 <head>
     <title>List Azure VMs (Web)</title>
+    
     {% bootstrap_css %}
+  
 
     <link href="{% static 'django_tables2/bootstrap.css' %}" rel="stylesheet" />
 </head>
@@ -18,7 +20,10 @@
 
 
         <h3>{% block title %}List Azure VMs (Web){% endblock %}</h3>
-        <a href="mailto:ETS_Asia_Tools@manulife.com">(Supported by: ETS Asia Toolings)</a>
+        <div align="right"><a href="mailto:ETS_Asia_Tools@manulife.com">(Supported by: ETS Asia Toolings)</a></div>
+        <a href="."> Home </a>
+    </p>
+        
 
         <div class="row">
             <div class="col-sm-10">
@@ -46,3 +51,4 @@
     </div>
 </body>
 </html>
+
