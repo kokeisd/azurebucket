@@ -25,7 +25,10 @@ import logging
 
 
 
-API_ENDPOINT = "http://10.235.17.55:8000/vmbucket/"
+
+#API_ENDPOINT = "http://10.235.17.55:8000/vmbucket/"
+
+API_ENDPOINT = os.environ['DJANGO_API_ENDPOINT']
 
 debug_mode = False
 quick_mode = True
@@ -40,22 +43,24 @@ CRED_FILE = 'cred.cfg'
 
 
 ################################
-def get_azure_cred(cred_file):
+def get_azure_cred():
     """Get credential
 
     :param cred_file: the file containing the Azure credential info
     :param subscription_id: Azure subscription id
     """
-    config = configparser.ConfigParser()
-    config.read(cred_file)
 
-    subscription_id = str(config['DEFAULT']['azure_subscription_id'])
+
+    #subscription_id = str(config['DEFAULT']['azure_subscription_id'])
     credentials = ServicePrincipalCredentials(
-        client_id=config['DEFAULT']['azure_client_id'],
-        secret=config['DEFAULT']['azure_client_secret'],
-        tenant=config['DEFAULT']['azure_tenant_id']
+      #  client_id=config['DEFAULT']['azure_client_id'],
+      #  secret=config['DEFAULT']['azure_client_secret'],
+      #  tenant=config['DEFAULT']['azure_tenant_id']
+      client_id = os.environ['AZURE_CLIENT_ID'],
+      secret = os.environ['AZURE_CLIENT_SECRET'],
+      tenant = os.environ['AZURE_TENANT_ID']
     )
-    return credentials, subscription_id
+    return credentials
 
 #####################
 def get_resource_groups(credentials,subscription_id):
@@ -293,7 +298,7 @@ def load_vm(credentials,subscription_id,resource_group =None):
         
 
 if __name__ == "__main__":
-    cred,subid = get_azure_cred(CRED_FILE)
+    cred = get_azure_cred()
     #load_vm(cred,subid,'EAS-HCS-DEV-01')
     #get_vm_list(cred,subid,'EAS-HCS-DEV-01')
     subscriptions_list = get_subscriptions(cred)
