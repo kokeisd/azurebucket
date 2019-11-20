@@ -1,0 +1,8 @@
+export DJANGO_ENV=DEV
+export DJANGO_DEBUG=True
+export DJANGO_SECRET_KEY="WQWRWTWTRWE"
+# export DJANGO_PROJECT_ROOT=/home/mladmin/kelvinko/git-projects/azurebucket
+export DJANGO_API_ENDPOINT="http://10.235.17.55:8000/vmbucket/"
+export AZURE_TENANT_ID='5d3e2773-e07f-4432-a630-1a0f68a28a05'
+export AZURE_CLIENT_ID='03828b49-95e3-4856-975f-8e12a6a50a73'
+export AZURE_CLIENT_SECRET='djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY='

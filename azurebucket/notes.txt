@@ -20,3 +20,20 @@ curl https://gist.githubusercontent.com/kokeisd/bb33f89457c2ff07cc18f9a3d9bd5721
 
     profile = os.environ.get('PROJECT_PROFILE','dev')
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'azurebucket.settings.%s' % profile)
+
+
+# docker image
+# build image
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker build -t  kokeisd/azurebucket:v0.1.0 .
+
+# Run azurebucket container
+docker run -d -p 8000:8000 --name azurebucket   kokeisd/azurebucket:v0.1.0 
+
+docker run --rm -it kokeisd/azurebucket:v0.1.0 bash
+
+docker run  -it kokeisd/azurebucket:v0.1.0 bash
+
+
+docker exec -it azurebucket bash

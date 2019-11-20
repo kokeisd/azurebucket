@@ -130,7 +130,7 @@ DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap3.html"
 
 import environ
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, '.django_env'))
 #environ.Env.read_env()
 root_path = environ.Path(__file__) - 2
 ENV = env('DJANGO_ENV')
