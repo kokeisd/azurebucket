@@ -22,18 +22,38 @@ curl https://gist.githubusercontent.com/kokeisd/bb33f89457c2ff07cc18f9a3d9bd5721
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'azurebucket.settings.%s' % profile)
 
 
+
+export DJANGO_SECRET_KEY="WQWRWTWTRWE"
+# export DJANGO_PROJECT_ROOT=/home/mladmin/kelvinko/git-projects/azurebucket
+export DJANGO_API_ENDPOINT="http://localhost:8000/vmbucket/"
+export AZURE_TENANT_ID='5d3e2773-e07f-4432-a630-1a0f68a28a05'
+export AZURE_CLIENT_ID='03828b49-95e3-4856-975f-8e12a6a50a73'
+export AZURE_CLIENT_SECRET='djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY='
+
+
+
 # docker image
 # build image
 docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
 docker build -t  kokeisd/azurebucket:v0.1.0 .
 
+docker run -d -e DJANGO_ENV=DEV \
+-e AZURE_TENANT_ID='5d3e2773-e07f-4432-a630-1a0f68a28a05' \
+-e AZURE_CLIENT_ID='03828b49-95e3-4856-975f-8e12a6a50a73' \
+-e AZURE_CLIENT_SECRET='djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY=' \
+-p 8000:8000 --name azurebucket   kokeisd/azurebucket:v0.1.0 
+
+
 # Run azurebucket container
-docker run -d -p 8000:8000 --name azurebucket   kokeisd/azurebucket:v0.1.0 
+docker run -d   -p 8000:8000 --name azurebucket   kokeisd/azurebucket:v0.1.0 
 
+
+
+# admin
+docker exec -it azurebucket bash
 docker run --rm -it kokeisd/azurebucket:v0.1.0 bash
-
 docker run  -it kokeisd/azurebucket:v0.1.0 bash
 
 
-docker exec -it azurebucket bash
+docker run --env VAR1=value1 - VAR2=value2 ubuntu env | grep VAR

@@ -1,8 +1,10 @@
 import sqlite3
+import os
 
 def deleteRecord():
+    app_root = os.environ['DJANGO_PROJECT_ROOT']
     try:
-        sqliteConnection = sqlite3.connect('../../db.sqlite3')
+        sqliteConnection = sqlite3.connect(app_root +'/db.sqlite3')
         cursor = sqliteConnection.cursor()
         print("Connected to SQLite")
 

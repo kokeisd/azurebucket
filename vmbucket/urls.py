@@ -17,7 +17,8 @@ urlpatterns = [
     url(r'^vmbucket/web/list/$', ListVMWebView.as_view()),
     url(r'^vmbucket/create/$', CreateView.as_view(), name="Create"),
     url(r'^vmbucket/update/(?P<name>.+)/$', UpdateView.as_view(), name="Update"),
-    url(r'^vmbucket/read/(?P<name>.+)/$', ListVMView.as_view(), name="List VM details"),
+    #url(r'^vmbucket/read/(?P<name>.+)/$', ListVMView.as_view(), name="List VM details"),
+    url(r'^vmbucket/vm/(?P<name>.+)/$', ListVMView.as_view(), name="List VM details"),
     url(r'^vmbucket/list/', ListAllVMView.as_view(), name="List All VM details"),
 
 ]

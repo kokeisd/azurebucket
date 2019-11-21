@@ -9,7 +9,7 @@ This script expects that the following environment vars are set:
 import os
 import json
 import traceback
-import configparser
+#import configparser
 
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.resource import ResourceManagementClient
@@ -36,9 +36,6 @@ quick_mode = True
 #logging.basicConfig(filename='loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO,filename='logs/loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 #logging.basicConfig(level=logging.INFO)
-
-
-CRED_FILE = 'cred.cfg'
 
 
 
