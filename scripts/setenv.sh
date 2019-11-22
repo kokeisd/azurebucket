@@ -14,4 +14,9 @@ export DJANGO_PORT=8000
 export DJANGO_DEBUG=True
 fi
 
+if [ $DJANGO_API_SERVER != "" ]
+then
+export DJANGO_API_ENDPOINT="http://${DJANGO_API_SERVER}:${DJANGO_PORT}/vmbucket/"
+else
 export DJANGO_API_ENDPOINT="http://localhost:${DJANGO_PORT}/vmbucket/"
+fi

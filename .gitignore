@@ -1,5 +1,10 @@
 venv/
-logs/
+logs/*
+**/scripts/logs/*
+.vscode
+.git
+myData/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

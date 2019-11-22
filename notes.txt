@@ -1,3 +1,12 @@
+# how to add cron to a container
+https://github.com/Ekito/docker-cron/blob/master/Dockerfile
+
+# docker-compose
+https://gabrieltanner.org/blog/docker-compose
+
+
+https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/multi-container-applications-docker-compose
+
 # Create a record
 curl -H "Content-Type: application/json"  -XPOST http://10.235.17.55:8000/vmbucket/create/ -d '{"name": "'"VM1"'","subscriptions": "'"MFC-Asia-DevQA_Internal-S1"'"}'	
 
@@ -42,7 +51,7 @@ docker run -d -e DJANGO_ENV=DEV \
 -e AZURE_TENANT_ID='5d3e2773-e07f-4432-a630-1a0f68a28a05' \
 -e AZURE_CLIENT_ID='03828b49-95e3-4856-975f-8e12a6a50a73' \
 -e AZURE_CLIENT_SECRET='djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY=' \
--p 8000:8000 --name azurebucket   kokeisd/azurebucket:v0.1.0 
+-p 8000:8000 -p 80:80 -p 443:443 --name azurebucket   kokeisd/azurebucket:v0.1.0
 
 
 # Run azurebucket container
@@ -57,3 +66,19 @@ docker run  -it kokeisd/azurebucket:v0.1.0 bash
 
 
 docker run --env VAR1=value1 - VAR2=value2 ubuntu env | grep VAR
+
+
+
+docker build -f Dockerfile.cron -t  kokeisd/azurebucket-cron:v0.1.0 .
+
+
+docker run -d -e DJANGO_ENV=DEV \
+-e AZURE_TENANT_ID='5d3e2773-e07f-4432-a630-1a0f68a28a05' \
+-e AZURE_CLIENT_ID='03828b49-95e3-4856-975f-8e12a6a50a73' \
+-e AZURE_CLIENT_SECRET='djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY=' \
+--name azurebucket-cron   kokeisd/azurebucket-cron:v0.1.0
+
+
+docker-compose up -d
+
+
