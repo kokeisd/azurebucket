@@ -1,6 +1,10 @@
 # https://buildmedia.readthedocs.org/media/pdf/azure-sdk-for-python/v2.0.0rc6/azure-sdk-for-python.pdf
 # https://docs.microsoft.com/en-us/python/api/azure-mgmt-compute/azure.mgmt.compute.v2019_04_01?view=azure-python
+# Removed all print statement to avoid broken-pipe error when running in cron
 """Create and manage virtual machines.
+
+
+
 
 This script expects that the following environment vars are set:
 

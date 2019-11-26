@@ -82,3 +82,4 @@ docker run -d -e DJANGO_ENV=DEV \
 docker-compose up -d
 
 
+http://heikok.blogspot.com/2016/09/crontab-environment-and-bashenv.html

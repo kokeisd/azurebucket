@@ -3,13 +3,12 @@ FROM python:3
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 WORKDIR /code
-RUN apt-get update \
-	&& apt-get -y install vim cron \
-	&& rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install vim cron -y
 RUN pip install virtualenv 
 RUN virtualenv venv 
 COPY requirements.txt /code/
 RUN /bin/bash -c "source venv/bin/activate && pip install -r requirements.txt"
+
 COPY . /code/
 ENV  DJANGO_ENV DEV
 ENV  DJANGO_DEBUG True
@@ -18,12 +17,13 @@ ENV  DJANGO_PROJECT_ROOT /code/
 ENV AZURE_TENANT_ID=${AZURE_TENANT_ID}
 ENV AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
 ENV AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+COPY scripts/vmbucket-cron /etc/cron.d/vmbucket-cron
+RUN printenv | sed 's/^\(.*\)$/export \1/g' > /code/scripts/cron_env.sh
+RUN chmod 0644 /etc/cron.d/vmbucket-cron 
+RUN touch /var/log/cron.log
+RUN crontab /etc/cron.d/vmbucket-cron 
+#CMD service cron stop
 
-RUN mkfifo /var/log/cron.log
-
-RUN chmod +x /code/scripts/startcron.sh
-
-
-#CMD /code/scripts/startcron.sh && tail -f /var/log/cron.log
-
-CMD /code/scripts/startcron.sh && cron -f 
+# CMD [ "/usr/sbin/cron -f" ]
+# CMD cron && tail -f /var/log/cron.log
+CMD ["cron", "-f"]
