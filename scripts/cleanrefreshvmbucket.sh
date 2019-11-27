@@ -1,7 +1,6 @@
 #!/bin/bash
 (
 ISRUNNING=`ps -ef |grep -v grep |grep -i 'loadvmbucket.py'|wc -l`
-#output=`ps -ef |grep -v grep |grep -i 'loadvmbucket.py\|refreshvmbucket.sh'`
 if  [ $ISRUNNING -gt 0 ]
 then
     echo "Process already running"

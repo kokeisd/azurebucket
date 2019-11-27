@@ -1,2 +1,0 @@
-* * * * * root bash /code/scripts/cron_env.sh && /code/scripts/refreshvmbucket.sh  >> /var/log/cron.log
-0 2 * * * root bash /code/scripts/cron_env.sh && /code/scripts/cleanrefreshvmbucket.sh >> /var/log/cron.log

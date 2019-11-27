@@ -16,7 +16,6 @@ def deleteRecord():
         print(cursor.fetchall())
 
 
-        #print(cursor.fetchall())
         sql_delete_query = 'delete from sqlite_sequence where name="vmbucket_vmbucket"';
         cursor.execute(sql_delete_query)
         sqliteConnection.commit()

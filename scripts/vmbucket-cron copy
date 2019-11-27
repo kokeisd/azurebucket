@@ -1,2 +1,0 @@
-* * * * * /code/scripts/refreshvmbucket.sh
-0 2 * * * /code/scripts/cleanrefreshvmbucket.sh

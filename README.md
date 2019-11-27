@@ -12,7 +12,8 @@ Secondly, the latency of sending to API call to Azure directly to retrieve VM in
 
 Last and mostly importantly, unlike Azure API which provides nested data(object) structure in API response, the inventory API provides VM information in a simple flat structure format. This greatly reduces the burden of developer and system admin for understanding the complexity data structure when they are working with data returned by the API.
 
-
+How does it work?
+----
 
 Usage
 ----

@@ -1,36 +1,27 @@
-# https://buildmedia.readthedocs.org/media/pdf/azure-sdk-for-python/v2.0.0rc6/azure-sdk-for-python.pdf
-# https://docs.microsoft.com/en-us/python/api/azure-mgmt-compute/azure.mgmt.compute.v2019_04_01?view=azure-python
-# Removed all print statement to avoid broken-pipe error when running in cron
-"""Create and manage virtual machines.
 
-
-
-
+"""
 This script expects that the following environment vars are set:
-
+DJANGO_API_ENDPOINT
+AZURE_CLIENT_ID
+AZURE_CLIENT_SECRET
+AZURE_TENANT_ID
 
 """
 import os
 import json
 import traceback
 #import configparser
-
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.compute.models import DiskCreateOption
 from azure.mgmt.resource import SubscriptionClient
-
 from msrestazure.azure_exceptions import CloudError
 import requests 
 from datetime import datetime
 import logging
 
-
-
-
-#API_ENDPOINT = "http://10.235.17.55:8000/vmbucket/"
 
 API_ENDPOINT = os.environ['DJANGO_API_ENDPOINT']
 
@@ -38,7 +29,8 @@ debug_mode = False
 quick_mode = True
 
 #logging.basicConfig(filename='loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
-logging.basicConfig(level=logging.INFO,filename='logs/loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.INFO,filename='logs/loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,filename='logs/loadvmdata.log', filemode='a', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 #logging.basicConfig(level=logging.INFO)
 
 
@@ -51,12 +43,8 @@ def get_azure_cred():
     :param subscription_id: Azure subscription id
     """
 
-
-    #subscription_id = str(config['DEFAULT']['azure_subscription_id'])
     credentials = ServicePrincipalCredentials(
-      #  client_id=config['DEFAULT']['azure_client_id'],
-      #  secret=config['DEFAULT']['azure_client_secret'],
-      #  tenant=config['DEFAULT']['azure_tenant_id']
+
       client_id = os.environ['AZURE_CLIENT_ID'],
       secret = os.environ['AZURE_CLIENT_SECRET'],
       tenant = os.environ['AZURE_TENANT_ID']
@@ -107,8 +95,6 @@ def get_vm_primary_ip(network,vm):
    
     primary_nic = vm.network_profile.network_interfaces[0].id.split('/')[-1:][0]
     primary_nic_rg = vm.network_profile.network_interfaces[0].id.split('/')[4]
-    #print(vm.network_profile.network_interfaces[0].id)
-    #print(primary_nic_rg, primary_nic)
     ip_configs=network.network_interfaces.get(primary_nic_rg, primary_nic).ip_configurations
 
     for ip_conf in ip_configs:
@@ -160,21 +146,16 @@ def send_rest_req(vm_info,API_URL):
     :param API_URL: the API server endpoint
     """    
     headers = {'Content-type': 'application/json'}
-    #API_URL = API_ENDPOINT + vm_info['name'] + "/"
     API_URL = API_ENDPOINT +"vm/"+ vm_info['name'] + "/"
     r = requests.get(url = API_URL) 
     if r.headers['Content-Length'] == "2":
-        print(str(datetime.now())+" The record does not exist...creating " + vm_info['name'])
         logging.info(str(datetime.now())+" The record does not exist...creating " + vm_info['name'])
         CREATE_URL = API_ENDPOINT + "create/"
         #print(CREATE_URL+" : "+ json.dumps(vm_info))
         r = requests.post(url = CREATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
     else:
-        print(str(datetime.now())+' The record exists...updating ' + vm_info['name'])
         logging.info(str(datetime.now())+' The record exists...updating ' + vm_info['name'])
-        #UPDATE_URL = API_ENDPOINT + vm_info['name'] + "/update/"
         UPDATE_URL = API_ENDPOINT + "update/" + vm_info['name']        
-        #print(UPDATE_URL+" : " +json.dumps(vm_info))
         r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False)               
 
 
@@ -194,7 +175,6 @@ def load_vm(credentials,subscription_id,resource_group =None):
     # print('\nList VMs in subscription')
 
     subscriptions = get_subscriptions(credentials)
-    #headers = {'Content-type': 'application/json'}
     
     if resource_group == None:
         for rg in get_resource_groups(credentials,subscription_id):
