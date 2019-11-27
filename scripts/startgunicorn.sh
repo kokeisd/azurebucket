@@ -1,5 +1,4 @@
 #!/bin/bash
-#DJANGO_PROJECT_ROOT=/home/mladmin/kelvinko/git-projects/azurebucket/
 
 source ${DJANGO_PROJECT_ROOT}/scripts/setenv.sh
 source ${DJANGO_PROJECT_ROOT}/venv/bin/activate

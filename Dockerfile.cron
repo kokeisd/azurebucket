@@ -10,7 +10,7 @@ RUN pip install virtualenv
 RUN virtualenv venv 
 COPY . /code/
 RUN /bin/bash -c "source venv/bin/activate && pip install -r requirements.txt"
-ENV  DJANGO_ENV DEV
+ENV  DJANGO_ENV ${DJANGO_ENV}
 ENV  DJANGO_DEBUG True
 ENV  DJANGO_SECRET_KEY "Djangokey"
 ENV  DJANGO_PROJECT_ROOT /code/

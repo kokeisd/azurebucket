@@ -19,6 +19,7 @@ Usage
 ----
 
 ````shell
+export DJANGO_ENV=DEV |PROD
 export AZURE_TENANT_ID=<azure_tenant_id>
 export AZURE_CLIENT_ID=<azure_client_id>
 export AZURE_CLIENT_SECRET=<azure_client_secret>
