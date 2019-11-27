@@ -5,6 +5,7 @@ notes.txt
 .vscode
 .git
 db.sqlite3
+myData
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -10,21 +10,21 @@ services:
       - "443:443"
     environment:
       - DJANGO_ENV= DEV
-      - AZURE_TENANT_ID=5d3e2773-e07f-4432-a630-1a0f68a28a05
-      - AZURE_CLIENT_ID=03828b49-95e3-4856-975f-8e12a6a50a73
-      - AZURE_CLIENT_SECRET=djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY=      
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}  
   azurebucket-cron:
     container_name: azurebucket-cron
     image: "azurebucket-cron:v0.1.0" 
     environment:
       - DJANGO_ENV=DEV
-      - AZURE_TENANT_ID=5d3e2773-e07f-4432-a630-1a0f68a28a05
-      - AZURE_CLIENT_ID=03828b49-95e3-4856-975f-8e12a6a50a73
-      - AZURE_CLIENT_SECRET=djd5hzSLRcaK0jTJjl1+xKPGQcRxUXiYDkuB0fq+ZjY=    
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}     
       - DJANGO_API_SERVER=azurebucket-web
       #- CRON_JOB1=* * * * * root bash /code/scripts/cron_env.sh && /code/scripts/refreshvmbucket.sh
       #- CRON_JOB2=0 2 * * * root bash /code/scripts/cron_env.sh && /code/scripts/cleanrefreshvmbucket.sh
-      - CRON_JOB1=12 * * * * /code/scripts/refreshvmbucket.sh
+      - CRON_JOB1=0 */2 * * * /code/scripts/refreshvmbucket.sh
       - CRON_JOB2=0 2 * * *  /code/scripts/cleanrefreshvmbucket.sh      
     links:
       - "azurebucket-web"

@@ -8,22 +8,15 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/*
 RUN pip install virtualenv 
 RUN virtualenv venv 
-COPY requirements.txt /code/
-RUN /bin/bash -c "source venv/bin/activate && pip install -r requirements.txt"
 COPY . /code/
+RUN /bin/bash -c "source venv/bin/activate && pip install -r requirements.txt"
 ENV  DJANGO_ENV DEV
 ENV  DJANGO_DEBUG True
-ENV  DJANGO_SECRET_KEY "WQWRWTWTRWE"
+ENV  DJANGO_SECRET_KEY "Djangokey"
 ENV  DJANGO_PROJECT_ROOT /code/
 ENV AZURE_TENANT_ID=${AZURE_TENANT_ID}
 ENV AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
 ENV AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
-
 RUN mkfifo /var/log/cron.log
-
 RUN chmod +x /code/scripts/startcron.sh
-
-
-#CMD /code/scripts/startcron.sh && tail -f /var/log/cron.log
-
 CMD /code/scripts/startcron.sh && cron -f 
