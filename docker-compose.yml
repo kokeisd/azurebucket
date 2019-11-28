@@ -1,0 +1,31 @@
+version: '3'
+services:
+  azurebucket-web:
+    container_name: azurebucket-web
+    #image: kokeisd/azurebucket-web:v0.1.0
+    image: azurebucket-web:v0.1.0
+    ports:
+      - "8000:8000"
+      - "80:80"
+      - "443:443"
+    environment:
+      - DJANGO_ENV=DEV
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}  
+  azurebucket-cron:
+    container_name: azurebucket-cron
+    #image: kokeisd/azurebucket-cron:v0.1.0
+    image: azurebucket-cron:v0.1.0
+    environment:
+      - DJANGO_ENV=DEV
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}     
+      - DJANGO_API_SERVER=azurebucket-web
+      #- CRON_JOB1=* * * * * root bash /code/scripts/cron_env.sh && /code/scripts/refreshvmbucket.sh
+      #- CRON_JOB2=0 2 * * * root bash /code/scripts/cron_env.sh && /code/scripts/cleanrefreshvmbucket.sh
+      - CRON_JOB1=0 */2 * * * /code/scripts/refreshvmbucket.sh
+      - CRON_JOB2=0 2 * * *  /code/scripts/cleanrefreshvmbucket.sh      
+    links:
+      - "azurebucket-web"
