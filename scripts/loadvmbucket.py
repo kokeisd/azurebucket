@@ -31,16 +31,16 @@ quick_mode = True
 #logging.basicConfig(filename='loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 #logging.basicConfig(level=logging.INFO,filename='logs/loadvmdata.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO,filename='logs/loadvmdata.log', filemode='a', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
+#logging.basicConfig(level=logging.DEBUG,filename='logs/loadvmdata.log', filemode='a', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 #logging.basicConfig(level=logging.INFO)
 
 
 
 ################################
 def get_azure_cred():
-    """Get credential
+    """Get service principle credential
 
-    :param cred_file: the file containing the Azure credential info
-    :param subscription_id: Azure subscription id
+
     """
 
     credentials = ServicePrincipalCredentials(
@@ -79,11 +79,17 @@ def get_vm(compute, resource_group, instance_name):
         resource_group, instance_name, expand='instanceView')     
 
 ##################
-def get_nic(network, resource_group, name):
+    """Gets information about the specified network interface.
+
+    :param credentials: 
+    :param resource_group: 
+    :param interface name:
+    """
+def get_nic(network, resource_group, ifname):
     try:
-        return network.network_interfaces.get(resource_group, name)
+        return network.network_interfaces.get(resource_group, ifname)
     except CloudError:
-        raise exception.PortNotFound(port_id=name)
+        raise exception.PortNotFound(port_id=ifname)
 
 #################
 def get_vm_primary_ip(network,vm):
@@ -152,11 +158,15 @@ def send_rest_req(vm_info,API_URL):
         logging.info(str(datetime.now())+" The record does not exist...creating " + vm_info['name'])
         CREATE_URL = API_ENDPOINT + "create/"
         #print(CREATE_URL+" : "+ json.dumps(vm_info))
+        logging.debug("URL: "+ CREATE_URL)               
+        logging.debug("Data: " + json.dumps(vm_info))
         r = requests.post(url = CREATE_URL, data = json.dumps(vm_info), headers=headers,verify=False) 
     else:
         logging.info(str(datetime.now())+' The record exists...updating ' + vm_info['name'])
-        UPDATE_URL = API_ENDPOINT + "update/" + vm_info['name']        
-        r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False)               
+        UPDATE_URL = API_ENDPOINT + "update/" + vm_info['name']  + "/"     
+        logging.debug("URL: "+ UPDATE_URL)               
+        logging.debug("Data: " + json.dumps(vm_info))
+        r = requests.put(url = UPDATE_URL, data = json.dumps(vm_info), headers=headers,verify=False)
 
 
 ############################
