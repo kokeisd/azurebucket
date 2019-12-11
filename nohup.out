@@ -1,3 +1,0 @@
-/home/mladmin/kelvinko/git-projects/azurebucket/scripts/setenv.sh: line 17: [: !=: unary operator expected
-scripts/refreshvmbucket.sh: line 11: /home/mladmin/kelvinko/git-projects/azurebucketvenv/bin/activate: No such file or directory
-scripts/refreshvmbucket.sh: line 15: 105783 Killed                  python loadvmbucket.py 2>&1
