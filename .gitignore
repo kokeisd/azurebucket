@@ -5,6 +5,7 @@ logs/*
 .git
 myData/
 nohup.txt
+**/nohup.txt
 
 
 # Byte-compiled / optimized / DLL files
