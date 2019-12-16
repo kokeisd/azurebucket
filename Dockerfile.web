@@ -8,7 +8,7 @@ ENV  DJANGO_PROJECT_ROOT /code/
 ENV AZURE_TENANT_ID=${AZURE_TENANT_ID}
 ENV AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
 ENV AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
-RUN mkdir /code
+RUN mkdir -p /code /code/logs /code/azurebucket/logs/ /code/scripts/logs
 WORKDIR /code
 RUN apt update && apt install vim cron -y
 RUN pip install virtualenv 
