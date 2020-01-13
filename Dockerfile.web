@@ -1,5 +1,25 @@
-  
-FROM python:3
+FROM python:3.7-alpine AS base
+WORKDIR /code
+RUN apk add --update \
+    postgresql-dev \
+    gcc \
+    musl-dev \
+    linux-headers \
+    libffi-dev \
+
+
+
+FROM base AS dependencies  
+COPY requirements.txt ./
+# install app dependencies
+RUN pip install -r requirements.txt
+
+FROM dependencies AS build  
+RUN mkdir -p /code /code/logs /code/azurebucket/logs/ /code/scripts/logs
+WORKDIR /code
+COPY . /code
+
+FROM python:3.7-alpine  AS release  
 ENV PYTHONUNBUFFERED 1
 ENV  DJANGO_ENV ${DJANGO_ENV}
 ENV  DJANGO_DEBUG True
@@ -8,13 +28,18 @@ ENV  DJANGO_PROJECT_ROOT /code/
 ENV AZURE_TENANT_ID=${AZURE_TENANT_ID}
 ENV AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
 ENV AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
-RUN mkdir -p /code /code/logs /code/azurebucket/logs/ /code/scripts/logs
+
 WORKDIR /code
-RUN apt update && apt install vim cron -y
-RUN pip install virtualenv 
-RUN virtualenv venv 
-COPY . /code/
-RUN /bin/bash -c "source venv/bin/activate && pip install -r requirements.txt"
-RUN /bin/bash -c "source venv/bin/activate && python /code/manage.py migrate"
+
+RUN apk add --update \
+    binutils \
+    libc-dev 
+
+# RUN apk add bash
+
+RUN pip install -r requirements.txt && rm -rf /root/.cache/pip/*
+COPY --from=build /code/ /code/
+RUN python /code/manage.py migrate
+
 CMD [ "./scripts/startgunicorn.sh" ]
 EXPOSE 80 443 8000
