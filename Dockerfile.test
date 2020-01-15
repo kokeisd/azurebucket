@@ -1,0 +1,40 @@
+#   FROM python:3.7-alpine as base
+#   
+#   
+#   RUN mkdir /install
+#   WORKDIR /install
+#   RUN apk add --no-cache python3 python3-dev py3-pip libffi libffi-dev musl-dev gcc libressl-dev bash
+#   COPY requirements.txt /requirements.txt
+#   RUN pip install --install-option="--prefix=/install" -r /requirements.txt
+#   
+#   
+#   ENV PYTHONUNBUFFERED 1
+#   ENV  DJANGO_ENV ${DJANGO_ENV}
+#   ENV  DJANGO_DEBUG True
+#   ENV  DJANGO_SECRET_KEY "Djangokey"
+#   ENV  DJANGO_PROJECT_ROOT /code/
+#   ENV AZURE_TENANT_ID=${AZURE_TENANT_ID}
+#   ENV AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+#   ENV AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+#   
+#   # run  cp -R  /install /usr/local
+#   run cp -R  /install/* /usr/local
+#   RUN mkdir -p /code /code/logs /code/azurebucket/logs/ /code/scripts/logs
+#   COPY . /code/
+#   WORKDIR /code/
+#   RUN apk add --no-cache bash
+#   RUN mkfifo /var/log/cron.log
+#   RUN chmod +x /code/scripts/startcron.sh
+#   #RUN /code/scripts/startcron.sh
+#   CMD /code/scripts/startcron.sh && crond -l 2 -f
+
+
+FROM python:3.7-alpine as base
+
+FROM base as builder
+COPY . /code/
+RUN mkdir /install
+WORKDIR /install
+RUN apk add --no-cache python3 python3-dev py3-pip libffi libffi-dev musl-dev gcc libressl-dev bash
+COPY requirements.txt /requirements.txt
+RUN pip install --install-option="--prefix=/install" -r /requirements.txt

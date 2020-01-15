@@ -2,7 +2,7 @@ version: '3'
 services:
   azurebucket-web:
     container_name: azurebucket-web
-    image: kokeisd/azurebucket-web:v0.1.1
+    image: kokeisd/azurebucket-web:v0.1.3
     #image: azurebucket-web:v0.1.1
     ports:
       - "8000:8000"
@@ -15,7 +15,7 @@ services:
       - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}  
   azurebucket-cron:
     container_name: azurebucket-cron
-    image: kokeisd/azurebucket-cron:v0.1.1
+    image: kokeisd/azurebucket-cron:v0.1.3
     #image: azurebucket-cron:v0.1.1
     environment:
       - DJANGO_ENV=DEV
