@@ -1,6 +1,7 @@
 #!/bin/bash
 #printenv > /code/scripts/.cron_env
-cronfile=/etc/cron.d/cron
+# cronfile=/etc/cron.d/cron
+cronfile=/etc/crontabs/root 
 cat /dev/null > $cronfile
 printenv |grep -v CRON_| sed 's/^\(.*\)$/export \1/g' > /code/scripts/.cron_env
 echo "SHELL=/bin/bash" >> $cronfile
@@ -12,7 +13,7 @@ for cronvar in ${!CRON_*}; do
 	echo "$cronvalue >> /dev/stdout 2>&1" >> $cronfile
 done
 echo >> $cronfile # Newline is required
-crontab /etc/cron.d/cron
+crontab $cronfile
 
 
 
