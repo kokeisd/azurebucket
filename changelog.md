@@ -1,9 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## 0.1.2 2020-01-14
+## 0.1.3 2020-01-16
 ### changed
-- reduced the size of the image
+- moved to multistage build to reduce image size
+- fixed some logical errors in scripts
 
 ## 0.1.2 2019-12-16
 ### changed
