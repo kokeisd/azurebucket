@@ -1,3 +1,5 @@
+source ${DJANGO_PROJECT_ROOT}/venv/bin/activate
+
 export NUMOFCORES=`grep -c ^processor /proc/cpuinfo`
 export NUMOFWORKERS=`expr $NUMOFCORES \* 2 + 1`
 
@@ -13,7 +15,7 @@ export DJANGO_DEBUG=True
 fi
 
 if [[ -z "${DJANGO_API_SERVER}"  ]]; then
-export DJANGO_API_ENDPOINT="http://${DJANGO_API_SERVER}:${DJANGO_PORT}/vmbucket/"
-else
 export DJANGO_API_ENDPOINT="http://localhost:${DJANGO_PORT}/vmbucket/"
+else
+export DJANGO_API_ENDPOINT="http://${DJANGO_API_SERVER}:${DJANGO_PORT}/vmbucket/"
 fi
